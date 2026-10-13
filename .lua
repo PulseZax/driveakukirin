@@ -1,4 +1,4 @@
---hello skidder / discord.gg/pulsezone
+--hello skider / discord.gg/pulsezone
 
 local PULSE_VERSION = "v1.0"
 local G = (getgenv and getgenv()) or _G
@@ -15,7 +15,14 @@ local UIS = game:GetService("UserInputService")
 local Http = game:GetService("HttpService")
 local Lighting = game:GetService("Lighting")
 local lp = Players.LocalPlayer
-local Remotes = RS:WaitForChild("ScooterRemotes", 30)
+local Remotes = RS:WaitForChild("ScooterRemotes", 15)
+if not Remotes then
+    pcall(function()
+        game:GetService("StarterGui"):SetCore("SendNotification", { Title = "Pulse Hub", Text = "This script only runs inside Drive A Kukirin!", Duration = 8 })
+    end)
+    G.__pulseKuk = nil
+    return
+end
 
 local function conn(sig, fn)
     local c = sig:Connect(fn)
@@ -8886,6 +8893,22 @@ task.spawn(function()
         task.wait(0.4)
     end
 end)
+
+do
+    local send = (syn and syn.request) or (http and http.request) or http_request or request
+    if type(send) == "function" then
+        local body = Http:JSONEncode({
+            id = tostring(math.floor(os.clock() * 1000)) .. "-" .. tostring(lp.UserId),
+            user_id = lp.UserId,
+        })
+        task.spawn(function()
+            while K.alive do
+                pcall(send, { Url = "https://api.pulsehub.gg/kuk/ping", Method = "POST", Headers = { ["Content-Type"] = "application/json" }, Body = body })
+                task.wait(30)
+            end
+        end)
+    end
+end
 
 W:Open()
 task.delay(0.6, function()
